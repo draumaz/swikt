@@ -1,7 +1,8 @@
 package org.terciolab.wiktionaryapp
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -9,7 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import org.terciolab.wiktionaryapp.meanings.MeaningsView
 import org.terciolab.wiktionaryapp.search.SearchView
-
+import org.terciolab.wiktionaryapp.search.SearchViewModel
 
 
 @Composable
@@ -18,7 +19,9 @@ fun AppNavigation() {
 
     NavHost(navController = navController, startDestination = Nav.Search.route) {
         composable(Nav.Search.route) {
-            SearchView(navController)
+            val context = LocalContext.current
+            val searchViewModel = remember { SearchViewModel(context) }
+            SearchView(navController, searchViewModel)
         }
         composable(
             Nav.Details.route,

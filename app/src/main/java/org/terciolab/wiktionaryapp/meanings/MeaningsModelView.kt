@@ -35,8 +35,8 @@ class MeaningsViewModel() : ViewModel() {
                 _wordMeanings.value = meanings
             } catch (e: Exception) {
                 _wordMeanings.value = emptyList()
-                Log.e("Error",e.toString())
-                throw e
+                Log.e("MeaningsViewModel", "Error fetching meanings for word '$word': ${e.message}", e)
+                // Don't re-throw the exception, just log it and return empty results
             } finally {
                 _isLoading.value = false
             }

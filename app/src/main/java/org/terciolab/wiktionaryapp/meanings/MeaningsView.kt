@@ -93,19 +93,23 @@ fun WordMeaningItem(meaning: WordMeaning) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+
         meaning.senses.forEachIndexed { i, sense ->
-            Text(
-                text = "${i + 1}. " + sense.glosses.joinToString(". ")
-                    .replaceFirstChar { it.titlecase(Locale.getDefault()) },
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Left
-            )
-            Text(
-                text = sense.tags?.joinToString(", ","[","]") ?: "",
-                style = MaterialTheme.typography.bodySmall,
-                textAlign = TextAlign.Left
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+            if(sense.glosses != null) {
+                Text(
+                    text = "${i + 1}. " + sense.glosses.joinToString(". ")
+                        .replaceFirstChar { it.titlecase(Locale.getDefault()) },
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Left
+                )
+
+                Text(
+                    text = sense.tags?.joinToString(", ", "[", "]") ?: "",
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Left
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
         }
     }
 

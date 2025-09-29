@@ -9,10 +9,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import org.terciolab.wiktionaryapp.Language
+import org.terciolab.wiktionaryapp.R
 import org.terciolab.wiktionaryapp.api.SearchWord
 
 @Composable
@@ -55,7 +57,7 @@ fun SearchView(navController: NavController, viewModel: SearchViewModel = viewMo
 @Composable
 fun SearchBar(query : String, selectedLang: Language, onLanguageSelected: (Language) -> Unit, onQueryChange: (String) -> Unit){
     Text(
-        text = "Wiktionary",
+        text = stringResource(R.string.app_name),
         modifier = Modifier
             .fillMaxWidth()
             .padding(10.dp),
@@ -70,7 +72,7 @@ fun SearchBar(query : String, selectedLang: Language, onLanguageSelected: (Langu
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            placeholder = { Text("Search for words...") },
+            placeholder = { Text(stringResource(id = R.string.search_placeholder)) },
             singleLine = true,
             trailingIcon = {
                 LanguageSelectionButton(
