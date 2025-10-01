@@ -136,7 +136,7 @@ fun LanguageSelectionButton(
         expanded = showLanguageMenu,
         onDismissRequest = { showLanguageMenu = false }
     ) {
-        Language.values().forEach { language ->
+        Language.entries.forEach { language ->
             DropdownMenuItem(
                 text = { Text("${language.displayName} (${language.code.uppercase()})") },
                 onClick = {

@@ -67,12 +67,12 @@ fun WordMeaningItem(meaning: WordMeaning) {
 
         Text(
             text = "${meaning.lang} | ${meaning.pos}",
-            style = MaterialTheme.typography.headlineMedium
+            style = MaterialTheme.typography.headlineSmall
         )
 
         meaning.sounds?.let {
             // ipa without tags
-            val ipa : String = meaning.sounds.mapNotNull { it.ipa }.joinToString(", ") ?: ""
+            val ipa : String = meaning.sounds.mapNotNull { it.ipa }.joinToString(", ")
 
             Text(
                 text = "IPA: $ipa",
@@ -99,7 +99,7 @@ fun WordMeaningItem(meaning: WordMeaning) {
                 Text(
                     text = "${i + 1}. " + sense.glosses.joinToString(". ")
                         .replaceFirstChar { it.titlecase(Locale.getDefault()) },
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Left
                 )
 
