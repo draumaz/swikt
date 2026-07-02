@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -26,8 +27,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -36,15 +39,50 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import androidx.activity.compose.PredictiveBackHandler
+import androidx.compose.ui.graphics.graphicsLayer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsView(viewModel: SettingsViewModel = viewModel()) {
+fun SettingsView(
+    viewModel: SettingsViewModel = viewModel(),
+    predictiveBackState: org.terciolab.wiktionaryapp.PredictiveBackState? = null,
+    onBack: () -> Unit = {}
+) {
     val scrollState = rememberScrollState()
     var isAboutExpanded by remember { mutableStateOf(false) }
     val isAmoled by viewModel.isAmoled.collectAsState()
 
+    predictiveBackState?.let { pbState ->
+        PredictiveBackHandler(enabled = true) { progress ->
+            pbState.isSwipeActive = true
+            try {
+                progress.collect { event ->
+                    pbState.progress = event.progress
+                }
+                pbState.isSwipeActive = false
+                pbState.progress = 0f
+                onBack()
+            } catch (e: Exception) {
+                pbState.isSwipeActive = false
+                pbState.progress = 0f
+            }
+        }
+    }
+
     Scaffold(
+        modifier = Modifier.graphicsLayer {
+            predictiveBackState?.let { pbState ->
+                val p = pbState.progress
+                val s = 1f - (p * 0.08f)
+                scaleX = s
+                scaleY = s
+                translationX = p * 400f
+                alpha = 1f - (p * 0.2f)
+                clip = true
+                shape = RoundedCornerShape((p * 28.dp.toPx()).coerceAtLeast(0f))
+            }
+        },
         topBar = {
             LargeTopAppBar(
                 title = { 
@@ -111,8 +149,12 @@ fun SettingsView(viewModel: SettingsViewModel = viewModel()) {
 
 @Composable
 fun AmoledSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    val haptic = LocalHapticFeedback.current
     Surface(
-        onClick = { onCheckedChange(!checked) },
+        onClick = { 
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            onCheckedChange(!checked) 
+        },
         shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         modifier = Modifier.fillMaxWidth()
@@ -136,7 +178,10 @@ fun AmoledSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
             )
             Switch(
                 checked = checked,
-                onCheckedChange = onCheckedChange,
+                onCheckedChange = {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onCheckedChange(it)
+                },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = MaterialTheme.colorScheme.primary,
                     checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
@@ -148,8 +193,12 @@ fun AmoledSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
 
 @Composable
 fun AboutButton(isExpanded: Boolean, onClick: () -> Unit) {
+    val haptic = LocalHapticFeedback.current
     Surface(
-        onClick = onClick,
+        onClick = {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            onClick()
+        },
         shape = MaterialTheme.shapes.extraLarge,
         color = if (isExpanded) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
         modifier = Modifier.fillMaxWidth()
@@ -270,11 +319,15 @@ fun ContributorItem(
     imageUrl: String? = null, 
     onClick: () -> Unit
 ) {
+    val haptic = LocalHapticFeedback.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = onClick)
+            .clickable(onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                onClick()
+            })
             .padding(vertical = 12.dp, horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

@@ -1,6 +1,12 @@
 package org.terciolab.wiktionaryapp.meanings
 
+import androidx.activity.compose.PredictiveBackHandler
+import androidx.compose.animation.*
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,19 +15,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -32,20 +37,34 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.terciolab.wiktionaryapp.api.WordMeaning
 import java.util.Locale
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun MeaningsView(
     word: String,
     lang: String,
+    predictiveBackState: org.terciolab.wiktionaryapp.PredictiveBackState,
     onBack: () -> Unit,
     onNavigateToWord: (String) -> Unit,
     viewModel: MeaningsViewModel = viewModel()
 ) {
     val wordMeanings by viewModel.wordMeanings.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+
+    PredictiveBackHandler(enabled = true) { progress ->
+        predictiveBackState.isSwipeActive = true
+        try {
+            progress.collect { event ->
+                predictiveBackState.progress = event.progress
+            }
+            predictiveBackState.isSwipeActive = false
+            predictiveBackState.progress = 0f
+            onBack()
+        } catch (e: Exception) {
+            predictiveBackState.isSwipeActive = false
+            predictiveBackState.progress = 0f
+        }
+    }
 
     LaunchedEffect(word) {
         viewModel.fetchWordMeanings(word, lang)
@@ -54,7 +73,18 @@ fun MeaningsView(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .graphicsLayer {
+                val p = predictiveBackState.progress
+                val s = 1f - (p * 0.08f)
+                scaleX = s
+                scaleY = s
+                translationX = p * 400f
+                alpha = 1f - (p * 0.2f)
+                clip = true
+                shape = RoundedCornerShape((p * 28.dp.toPx()).coerceAtLeast(0f))
+            },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
@@ -110,8 +140,18 @@ fun MeaningsView(
 
 @Composable
 fun WordMeaningItem(meaning: WordMeaning, onNavigateToWord: (String) -> Unit) {
+    var isExpanded by remember { mutableStateOf(true) }
+    val haptic = LocalHapticFeedback.current
+
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize(
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessMedium
+                )
+            ),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -122,187 +162,227 @@ fun WordMeaningItem(meaning: WordMeaning, onNavigateToWord: (String) -> Unit) {
             verticalArrangement = Arrangement.Top
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { 
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        isExpanded = !isExpanded 
+                    },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = meaning.pos.replaceFirstChar { it.uppercase() },
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
-                )
-                Surface(
-                    shape = MaterialTheme.shapes.small,
-                    color = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = meaning.lang,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                        style = MaterialTheme.typography.labelSmall
+                        text = meaning.pos.replaceFirstChar { it.uppercase() },
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
                     )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            meaning.sounds?.let { sounds ->
-                val ipa: String = sounds.asSequence().mapNotNull { it.ipa }.joinToString(", ")
-                if (ipa.isNotEmpty()) {
-                    Text(
-                        text = "IPA: $ipa",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-            }
-
-            meaning.forms?.let { forms ->
-                GrammarSection(forms)
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            meaning.etymology_text?.let { etymology ->
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedCard(
-                    shape = MaterialTheme.shapes.large,
-                    colors = CardDefaults.outlinedCardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.15f),
-                        contentColor = MaterialTheme.colorScheme.onSurface
-                    ),
-                    border = CardDefaults.outlinedCardBorder().copy(
-                        brush = androidx.compose.ui.graphics.SolidColor(
-                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Surface(
+                        shape = MaterialTheme.shapes.small,
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    ) {
+                        Text(
+                            text = meaning.lang,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                            style = MaterialTheme.typography.labelSmall
                         )
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(bottom = 12.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.History,
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = "Etymology & Origins",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-
-                        Row(modifier = Modifier.height(IntrinsicSize.Min)) {
-                            // Decorative full-height vertical line
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .width(3.dp)
-                                    .clip(MaterialTheme.shapes.extraSmall)
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
-                            )
-                            
-                            Spacer(modifier = Modifier.width(16.dp))
-
-                            val linkColor = MaterialTheme.colorScheme.primary
-                            val annotatedEtymology = remember(etymology) {
-                                parseEtymology(etymology, linkColor)
-                            }
-
-                            ClickableText(
-                                text = annotatedEtymology,
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    lineHeight = 24.sp,
-                                    letterSpacing = 0.2.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                ),
-                                onClick = { offset ->
-                                    annotatedEtymology.getStringAnnotations(tag = "WORD", start = offset, end = offset)
-                                        .firstOrNull()?.let { annotation ->
-                                            onNavigateToWord(annotation.item)
-                                        }
-                                }
-                            )
-                        }
                     }
                 }
-                Spacer(modifier = Modifier.height(24.dp))
+                
+                IconButton(onClick = { 
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    isExpanded = !isExpanded 
+                }) {
+                    Icon(
+                        imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = if (isExpanded) "Collapse" else "Expand",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-            Spacer(modifier = Modifier.height(16.dp))
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
+                ) + fadeIn(animationSpec = tween(150)),
+                exit = shrinkVertically(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
+                ) + fadeOut(animationSpec = tween(150))
+            ) {
+                Column {
+                    Spacer(modifier = Modifier.height(8.dp))
 
-            meaning.senses.forEachIndexed { i, sense ->
-                if (sense.glosses != null) {
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.5f),
-                        border = androidx.compose.foundation.BorderStroke(
-                            1.dp, 
-                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-                        )
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Row(verticalAlignment = Alignment.Top) {
-                                // Index badge
-                                Surface(
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(22.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Text(
-                                            text = "${i + 1}",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onPrimary,
-                                            fontWeight = FontWeight.ExtraBold
-                                        )
-                                    }
-                                }
-                                
-                                Spacer(modifier = Modifier.width(12.dp))
-                                
-                                Text(
-                                    text = sense.glosses.joinToString(". ")
-                                        .replaceFirstChar { it.titlecase(Locale.getDefault()) },
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    lineHeight = 24.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
+                    meaning.sounds?.let { sounds ->
+                        val ipa: String = sounds.asSequence().mapNotNull { it.ipa }.joinToString(", ")
+                        if (ipa.isNotEmpty()) {
+                            Text(
+                                text = "IPA: $ipa",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+
+                    meaning.forms?.let { forms ->
+                        GrammarSection(forms)
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+                    meaning.etymology_text?.let { etymology ->
+                        Spacer(modifier = Modifier.height(16.dp))
+                        OutlinedCard(
+                            shape = MaterialTheme.shapes.large,
+                            colors = CardDefaults.outlinedCardColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.15f),
+                                contentColor = MaterialTheme.colorScheme.onSurface
+                            ),
+                            border = CardDefaults.outlinedCardBorder().copy(
+                                brush = androidx.compose.ui.graphics.SolidColor(
+                                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                                 )
-                            }
-
-                            sense.tags?.let { tags ->
-                                Spacer(modifier = Modifier.height(12.dp))
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
                                 Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(bottom = 12.dp)
                                 ) {
-                                    tags.forEach { tag ->
+                                    Icon(
+                                        imageVector = Icons.Default.History,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        text = "Etymology & Origins",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+
+                                Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+                                    // Decorative full-height vertical line
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxHeight()
+                                            .width(3.dp)
+                                            .clip(MaterialTheme.shapes.extraSmall)
+                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                                    )
+                                    
+                                    Spacer(modifier = Modifier.width(16.dp))
+
+                                    val linkColor = MaterialTheme.colorScheme.primary
+                                    val annotatedEtymology = remember(etymology) {
+                                        parseEtymology(etymology, linkColor)
+                                    }
+
+                                    ClickableText(
+                                        text = annotatedEtymology,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            lineHeight = 24.sp,
+                                            letterSpacing = 0.2.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        ),
+                                        onClick = { offset ->
+                                            annotatedEtymology.getStringAnnotations(tag = "WORD", start = offset, end = offset)
+                                                .firstOrNull()?.let { annotation ->
+                                                    onNavigateToWord(annotation.item)
+                                                }
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
+
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    meaning.senses.forEachIndexed { i, sense ->
+                        if (sense.glosses != null) {
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 12.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.5f),
+                                border = androidx.compose.foundation.BorderStroke(
+                                    1.dp, 
+                                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                                )
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Row(verticalAlignment = Alignment.Top) {
+                                        // Index badge
                                         Surface(
                                             shape = CircleShape,
-                                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f),
-                                            border = androidx.compose.foundation.BorderStroke(
-                                                1.dp,
-                                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
-                                            )
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(22.dp)
                                         ) {
-                                            Text(
-                                                text = tag,
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                                fontWeight = FontWeight.Bold,
-                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                                            )
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Text(
+                                                    text = "${i + 1}",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.onPrimary,
+                                                    fontWeight = FontWeight.ExtraBold
+                                                )
+                                            }
+                                        }
+                                        
+                                        Spacer(modifier = Modifier.width(12.dp))
+                                        
+                                        Text(
+                                            text = sense.glosses.joinToString(". ")
+                                                .replaceFirstChar { it.titlecase(Locale.getDefault()) },
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            lineHeight = 24.sp,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+
+                                    sense.tags?.let { tags ->
+                                        Spacer(modifier = Modifier.height(12.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                        ) {
+                                            tags.forEach { tag ->
+                                                Surface(
+                                                    shape = CircleShape,
+                                                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f),
+                                                    border = androidx.compose.foundation.BorderStroke(
+                                                        1.dp,
+                                                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
+                                                    )
+                                                ) {
+                                                    Text(
+                                                        text = tag,
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                        fontWeight = FontWeight.Bold,
+                                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
                                 }
