@@ -10,6 +10,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -36,6 +37,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -49,15 +51,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -77,7 +86,7 @@ import org.terciolab.wiktionaryapp.search.SearchView
 import org.terciolab.wiktionaryapp.search.SearchViewModel
 import org.terciolab.wiktionaryapp.settings.SettingsView
 import org.terciolab.wiktionaryapp.settings.SettingsViewModel
-
+import kotlin.math.roundToInt
 
 @Composable
 fun AppNavigation(settingsViewModel: SettingsViewModel = viewModel()) {
@@ -90,7 +99,26 @@ fun AppNavigation(settingsViewModel: SettingsViewModel = viewModel()) {
         else -> false
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    val bottomBarHeight = 150.dp
+    val bottomBarHeightPx = with(LocalDensity.current) { bottomBarHeight.roundToPx().toFloat() }
+    val bottomBarOffsetHeightPx = remember { mutableStateOf(0f) }
+
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                val delta = available.y
+                val newOffset = bottomBarOffsetHeightPx.value + delta
+                bottomBarOffsetHeightPx.value = newOffset.coerceIn(-bottomBarHeightPx, 0f)
+                return Offset.Zero
+            }
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(nestedScrollConnection)
+    ) {
         NavHost(
             navController = navController,
             startDestination = Nav.Search.route,
@@ -166,7 +194,17 @@ fun AppNavigation(settingsViewModel: SettingsViewModel = viewModel()) {
         }
 
         if (showBottomBar) {
-            Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+            val animatedOffset by animateIntAsState(
+                targetValue = bottomBarOffsetHeightPx.value.roundToInt(),
+                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                label = "bottom_bar_offset"
+            )
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .offset { IntOffset(x = 0, y = -animatedOffset) }
+            ) {
                 ExpressiveNavigationBar(navController)
             }
         }
