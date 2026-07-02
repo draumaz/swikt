@@ -11,16 +11,15 @@ import org.terciolab.wiktionaryapp.api.WordMeaning
 import org.terciolab.wiktionaryapp.getLanguageByCode
 
 
-class MeaningsViewModel() : ViewModel() {
+class MeaningsViewModel : ViewModel() {
 
-    private var _wordMeanings = MutableStateFlow<List<WordMeaning>>(emptyList())
+    private val _wordMeanings = MutableStateFlow<List<WordMeaning>>(emptyList())
     val wordMeanings: StateFlow<List<WordMeaning>> = _wordMeanings
 
     private val _isLoading = MutableStateFlow(false)
-    val isLoading:  StateFlow<Boolean> = _isLoading
+    val isLoading: StateFlow<Boolean> = _isLoading
 
     fun fetchWordMeanings(word: String, langCode: String) {
-
         val langPrefix = getLanguageByCode(langCode).prefix
 
         viewModelScope.launch {
@@ -36,7 +35,6 @@ class MeaningsViewModel() : ViewModel() {
             } catch (e: Exception) {
                 _wordMeanings.value = emptyList()
                 Log.e("MeaningsViewModel", "Error fetching meanings for word '$word': ${e.message}", e)
-                // Don't re-throw the exception, just log it and return empty results
             } finally {
                 _isLoading.value = false
             }

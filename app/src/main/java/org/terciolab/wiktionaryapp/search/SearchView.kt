@@ -4,19 +4,27 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import org.terciolab.wiktionaryapp.Language
 import org.terciolab.wiktionaryapp.R
 import org.terciolab.wiktionaryapp.api.SearchWord
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchView(navController: NavController, viewModel: SearchViewModel = viewModel()) {
     var query by remember { mutableStateOf("") }
@@ -24,99 +32,163 @@ fun SearchView(navController: NavController, viewModel: SearchViewModel = viewMo
     val isLoading by viewModel.isLoading.collectAsState()
     val selectedLang by viewModel.selectedLanguage.collectAsState()
 
-    Column(modifier = Modifier.padding(10.dp))
-    {
-        SearchBar(query, selectedLang,
-            onLanguageSelected = { lang ->
-                viewModel.setLanguage(lang)
-                viewModel.clearList()
-            },
-            onQueryChange = {
-                query = it
-                viewModel.searchWord(it)
-            }
-        )
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (isLoading) {
-            Box(
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        topBar = {
+            LargeTopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(R.string.app_name),
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                scrollBehavior = scrollBehavior
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(top = innerPadding.calculateTopPadding())
+                .fillMaxSize()
+        ) {
+            OutlinedTextField(
+                value = query,
+                onValueChange = {
+                    query = it
+                    viewModel.searchWord(it)
+                },
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                placeholder = { Text(stringResource(id = R.string.search_placeholder)) },
+                singleLine = true,
+                shape = RoundedCornerShape(28.dp),
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                trailingIcon = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (query.isNotEmpty()) {
+                            IconButton(onClick = {
+                                query = ""
+                                viewModel.clearList()
+                            }) {
+                                Icon(Icons.Default.Close, contentDescription = "Clear")
+                            }
+                        }
+                        LanguageSelectionButton(
+                            selectedLanguage = selectedLang,
+                            onLanguageSelected = { lang ->
+                                viewModel.setLanguage(lang)
+                                viewModel.clearList()
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                )
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (searchResults.isEmpty() && query.isEmpty()) {
+                EmptyState()
+            } else {
+                WordList(searchResults, navController, selectedLang)
             }
-        } else {
-            WordList(searchResults, navController, selectedLang )
         }
     }
 }
 
 @Composable
-fun SearchBar(query : String, selectedLang: Language, onLanguageSelected: (Language) -> Unit, onQueryChange: (String) -> Unit){
-    Text(
-        text = stringResource(R.string.app_name),
+fun EmptyState() {
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(10.dp),
-        style = MaterialTheme.typography.headlineSmall,
-        textAlign = TextAlign.Center
-    )
-
-    Row {
-        TextField(
-            value = query,
-            onValueChange = onQueryChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            placeholder = { Text(stringResource(id = R.string.search_placeholder)) },
-            singleLine = true,
-            trailingIcon = {
-                LanguageSelectionButton(
-                    selectedLanguage = selectedLang,
-                    onLanguageSelected = { lang ->
-                        onLanguageSelected(lang)
-                    }
-                )
-            }
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Search,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
         )
-
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Search for definitions",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = "Explore the world's knowledge in multiple languages.",
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+        )
     }
-
 }
-
 
 @Composable
 fun WordList(words: List<SearchWord>, navController: NavController, lang: Language) {
-    LazyColumn {
+    LazyColumn(
+        contentPadding = PaddingValues(bottom = 120.dp)
+    ) {
         items(words) { word ->
-            WordItem(word, {
+            WordItem(word) {
                 navController.navigate("details/${lang.code}/${word.title}")
-            })
+            }
         }
     }
 }
 
 @Composable
 fun WordItem(word: SearchWord, onClickWord: () -> Unit) {
-    Row(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(
-                horizontal = 16.dp,
-                vertical = 8.dp
-            )
-            .clickable {
-                onClickWord()
-            }
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .clickable { onClickWord() },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        ),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Text(
-            text = word.title,
-            style = MaterialTheme.typography.headlineSmall,
-        )
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = word.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
     }
 }
 
@@ -128,8 +200,22 @@ fun LanguageSelectionButton(
 ) {
     var showLanguageMenu by remember { mutableStateOf(false) }
 
-    IconButton(onClick = { showLanguageMenu = true }) {
-        Text(selectedLanguage.code.uppercase())
+    Surface(
+        onClick = { showLanguageMenu = true },
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = selectedLanguage.code.uppercase(),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 
     DropdownMenu(

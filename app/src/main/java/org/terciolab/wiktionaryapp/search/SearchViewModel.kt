@@ -1,8 +1,8 @@
 package org.terciolab.wiktionaryapp.search
 
-import android.content.Context
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,9 +16,9 @@ import org.terciolab.wiktionaryapp.getLanguageByCode
 import java.util.Locale
 
 
-class SearchViewModel(context: Context) : ViewModel() {
+class SearchViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val locales = context.resources.configuration.locales
+    private val locales = application.resources.configuration.locales
 
     private val _searchResults = MutableStateFlow<List<SearchWord>>(emptyList())
     val searchResults: StateFlow<List<SearchWord>> = _searchResults
@@ -30,7 +30,7 @@ class SearchViewModel(context: Context) : ViewModel() {
     val selectedLanguage: StateFlow<Language> = _selectedLanguage
 
     fun searchWord(query: String) {
-        if(query.length < 1){
+        if (query.isEmpty()) {
             return
         }
         viewModelScope.launch {
@@ -41,27 +41,23 @@ class SearchViewModel(context: Context) : ViewModel() {
 
                 _searchResults.value = results.pages
             } catch (e: Exception) {
-                _searchResults.value = emptyList() // Handle error
+                _searchResults.value = emptyList()
                 Log.e("SearchViewModel", "Error searching for word '$query': ${e.message}", e)
-                // Don't re-throw the exception, just log it and return empty results
             } finally {
                 _isLoading.value = false
             }
         }
-
     }
 
     fun setLanguage(language: Language) {
         _selectedLanguage.update { language }
     }
 
-    fun clearList(){
+    fun clearList() {
         _searchResults.value = emptyList()
     }
 
-    fun getCurrentLocale() : Locale {
+    fun getCurrentLocale(): Locale {
         return locales[0]
     }
-
 }
-

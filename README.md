@@ -15,18 +15,13 @@ Each definition page includes **IPA pronunciation**, **etymology**, and other 
     
 - **Multi-language Support**: Get definitions in multiple languages using the Wiktionary API.
     
-- **Word Details**:
-    
-    - IPA pronunciation
-        
-    - Etymology
-        
-    - Additional word details (to be added in future updates)
-        
-- **Modern UI**: Built with **Jetpack Compose** and **Material Design 3** for a clean and intuitive user experience.
-    
-- **Easy Installation**: Available on the Google Play Store (approval pending) or can be built locally using Android Studio.
-    
+- **Deep Link Support**: Redirect links ending in `*.wiktionary.org` directly into the app for a seamless experience.
+
+- **Expressive M3 UI**: Built with **Jetpack Compose** and **Material Design 3**, featuring a modern, floating navigation pill and collapsible app bars.
+
+- **Predictive Back Support**: Native support for Android's predictive back gesture for smooth navigation.
+
+- **Edge-to-Edge Design**: Fully immersive experience where content flows behind system bars and navigation elements.
 
 ---
 
@@ -56,7 +51,7 @@ Once approved, you can download the app directly from the Google Play Store.
     
 3. View the definition, IPA pronunciation, etymology, and other details.
     
-4. Switch between languages to see definitions in different languages.
+4. Navigate effortlessly using the custom floating navigation pill.
     
 
 ---
@@ -69,7 +64,7 @@ Once approved, you can download the app directly from the Google Play Store.
     
 - **Moshi**: For parsing JSON responses from the API.
     
-- **Material Design 3**: For a clean and modern user interface.
+- **Material Design 3**: For a clean and modern user interface with expressive components.
     
 
 ---
