@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -80,7 +81,12 @@ fun SearchView(navController: NavController, viewModel: SearchViewModel = viewMo
                         val trimmedQuery = query.trim()
                         if (trimmedQuery.isNotBlank()) {
                             focusManager.clearFocus()
-                            navController.navigate("details/${selectedLang.code}/$trimmedQuery")
+                            val targetWord = if (searchResults.isNotEmpty()) {
+                                searchResults[0].title
+                            } else {
+                                trimmedQuery
+                            }
+                            navController.navigate("details/${selectedLang.code}/$targetWord")
                         }
                     }
                 ),
@@ -167,25 +173,35 @@ fun WordList(words: List<SearchWord>, navController: NavController, lang: Langua
     LazyColumn(
         contentPadding = PaddingValues(bottom = 120.dp)
     ) {
-        items(words) { word ->
-            WordItem(word) {
-                navController.navigate("details/${lang.code}/${word.title}")
-            }
+        itemsIndexed(words) { index, word ->
+            WordItem(
+                word = word,
+                isHighlighted = index == 0,
+                onClickWord = {
+                    navController.navigate("details/${lang.code}/${word.title}")
+                }
+            )
         }
     }
 }
 
 @Composable
-fun WordItem(word: SearchWord, onClickWord: () -> Unit) {
+fun WordItem(word: SearchWord, isHighlighted: Boolean = false, onClickWord: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
             .clickable { onClickWord() },
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            containerColor = if (isHighlighted) 
+                MaterialTheme.colorScheme.primaryContainer 
+            else 
+                MaterialTheme.colorScheme.surfaceContainerHigh
         ),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(16.dp),
+        border = if (isHighlighted) 
+            androidx.compose.foundation.BorderStroke(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+        else null
     ) {
         Row(
             modifier = Modifier
@@ -197,13 +213,14 @@ fun WordItem(word: SearchWord, onClickWord: () -> Unit) {
                 Text(
                     text = word.title,
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = if (isHighlighted) FontWeight.ExtraBold else FontWeight.Medium,
+                    color = if (isHighlighted) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
                 )
             }
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+                tint = if (isHighlighted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
             )
         }
     }
