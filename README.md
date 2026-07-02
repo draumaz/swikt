@@ -1,52 +1,49 @@
-# 📖 swikt
+# swikt
 
 [![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/about/versions/15)
 [![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=for-the-badge&logo=jetpack-compose&logoColor=white)](https://developer.android.com/compose)
-[![Vibe Coded](https://img.shields.io/badge/Vibe%20Coded-Gemini-orange?style=for-the-badge&logo=google-gemini&logoColor=white)](https://deepmind.google/technologies/gemini/android-studio/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-**swikt** is a beautifully crafted fork of [Terciocode's Simple Wiktionary](https://github.com/Terciocode/WiktionaryTercioApp). 
-It’s an open-source Android dictionary experience designed for speed, clarity, and modern aesthetics—mostly because **draumaz** doesn't actually know how to write a single line of Kotlin and relies entirely on AI to do the heavy lifting.
-
-All adaptations in this fork have been meticulously **vibe coded with Gemini in Android Studio**, because let's be honest, draumaz would be lost without a prompt box. ✨
+**swikt** is a fork of [Terciocode's Simple Wiktionary](https://github.com/Terciocode/WiktionaryTercioApp). 
+It is an open-source Android dictionary application designed for speed, clarity, and a modern user interface.
 
 ---
 
-## ✨ Features
+## Features
 
-- **🚀 Performance First**: Built for speed using the Wiktionary API and Kaikki.org.
-- **🌍 Polyglot Ready**: Full support for English and Spanish definitions, plus words from countless other languages.
-- **🎨 Material 3 Magic**: A state-of-the-art UI featuring a custom floating navigation pill and dynamic, collapsible app bars.
-- **🔗 Deep Link Integration**: Links ending in `*.wiktionary.org` open directly in the app for a frictionless workflow.
-- **🔄 Modern UX**: Full support for **Predictive Back** gestures and an **Edge-to-Edge** layout that makes your screen feel limitless.
-- **🛡️ Privacy Minded**: No ads, no tracking, no bloat. Just definitions.
+- **Performance First**: Optimized for speed using the Wiktionary API and Kaikki.org.
+- **Polyglot Support**: Support for English and Spanish definitions, and words from various other languages.
+- **Material 3 Interface**: Modern UI featuring a custom floating navigation pill and dynamic, collapsible app bars.
+- **Deep Link Integration**: Links ending in `*.wiktionary.org` open directly in the app.
+- **Modern UX**: Support for Predictive Back gestures and an Edge-to-Edge layout.
+- **Privacy Focused**: No ads, no tracking, and no unnecessary bloat.
 
 ---
 
-## 📸 Gallery
+## Gallery
 
 | Home Screen | Search | Definitions |
 | :---: | :---: | :---: |
 | ![Home](img/swikt-home.jpg) | ![Search](img/swikt-search.jpg) | ![List](img/swikt-list.jpg) |
-| *Clean Landing* | *Instant Search* | *Rich Details* |
+| *Home Screen* | *Search Interface* | *Word Details* |
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-Built with the best-in-class Android libraries:
+Built with standard Android libraries and best practices:
 
 *   **UI**: [Jetpack Compose](https://developer.android.com/compose) with [Material Design 3](https://m3.material.io/)
-*   **Networking**: [Retrofit](https://square.github.io/retrofit/) & OkHttp (with Logging Interceptor)
-*   **Serialization**: [Moshi](https://github.com/square/moshi) (with KSP-based codegen)
+*   **Networking**: [Retrofit](https://square.github.io/retrofit/) & OkHttp
+*   **Serialization**: [Moshi](https://github.com/square/moshi)
 *   **Navigation**: [Compose Navigation](https://developer.android.com/jetpack/compose/navigation)
 *   **Image Loading**: [Coil](https://coil-kt.github.io/coil/)
 *   **Architecture**: MVVM with Clean Architecture principles
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 *   Android Studio Ladybug (or newer)
@@ -54,29 +51,28 @@ Built with the best-in-class Android libraries:
 *   Android SDK 35
 
 ### Build Locally
-1. **Clone the repo**
+1. **Clone the repository**
    ```bash
    git clone https://github.com/draumaz/swikt.git
    ```
 2. **Open in Android Studio**
-   Wait for the Gradle sync to finish.
-3. **Run it!**
-   Select your device and hit `Shift + F10`.
+   Wait for the Gradle sync to complete.
+3. **Run the application**
+   Select your device and press `Shift + F10`.
 
 ---
 
-## 🤝 Credits & Acknowledgements
+## Credits and Acknowledgements
 
-- **[Terciocode](https://github.com/Terciocode)**: For the rock-solid foundation of the original app.
-- **[draumaz](https://github.com/draumaz)**: For the architectural vision and vibe-heavy adaptations.
-- **Gemini in Android Studio**: For being the ultimate pair programmer and vibe-coding engine.
-- **Wiktionary & Kaikki.org**: For the incredible open-data APIs.
+- **[Terciocode](https://github.com/Terciocode)**: For the original application foundation.
+- **[draumaz](https://github.com/draumaz)**: For the fork and architectural adaptations.
+- **Wiktionary & Kaikki.org**: For the open-data APIs.
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ---
-<p align="center">Made with ❤️ and ✨ by draumaz</p>
+<p align="center">Developed by draumaz</p>

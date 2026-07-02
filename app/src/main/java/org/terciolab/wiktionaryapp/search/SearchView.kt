@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
@@ -14,8 +16,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -27,11 +32,12 @@ import org.terciolab.wiktionaryapp.api.SearchWord
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchView(navController: NavController, viewModel: SearchViewModel = viewModel()) {
-    var query by remember { mutableStateOf("") }
+    val query by viewModel.query.collectAsState()
     val searchResults by viewModel.searchResults.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val selectedLang by viewModel.selectedLanguage.collectAsState()
 
+    val focusManager = LocalFocusManager.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     Scaffold(
@@ -57,7 +63,6 @@ fun SearchView(navController: NavController, viewModel: SearchViewModel = viewMo
             OutlinedTextField(
                 value = query,
                 onValueChange = {
-                    query = it
                     viewModel.searchWord(it)
                 },
                 modifier = Modifier
@@ -66,13 +71,25 @@ fun SearchView(navController: NavController, viewModel: SearchViewModel = viewMo
                 placeholder = { Text(stringResource(id = R.string.search_placeholder)) },
                 singleLine = true,
                 shape = RoundedCornerShape(28.dp),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Search,
+                    keyboardType = KeyboardType.Text
+                ),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        val trimmedQuery = query.trim()
+                        if (trimmedQuery.isNotBlank()) {
+                            focusManager.clearFocus()
+                            navController.navigate("details/${selectedLang.code}/$trimmedQuery")
+                        }
+                    }
+                ),
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 trailingIcon = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (query.isNotEmpty()) {
                             IconButton(onClick = {
-                                query = ""
-                                viewModel.clearList()
+                                viewModel.clearQuery()
                             }) {
                                 Icon(Icons.Default.Close, contentDescription = "Clear")
                             }
@@ -81,7 +98,7 @@ fun SearchView(navController: NavController, viewModel: SearchViewModel = viewMo
                             selectedLanguage = selectedLang,
                             onLanguageSelected = { lang ->
                                 viewModel.setLanguage(lang)
-                                viewModel.clearList()
+                                viewModel.clearQuery()
                             }
                         )
                         Spacer(modifier = Modifier.width(8.dp))

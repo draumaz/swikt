@@ -1,15 +1,10 @@
 package org.terciolab.wiktionaryapp
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -29,6 +24,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
@@ -61,16 +57,17 @@ import org.terciolab.wiktionaryapp.meanings.MeaningsView
 import org.terciolab.wiktionaryapp.search.SearchView
 import org.terciolab.wiktionaryapp.search.SearchViewModel
 import org.terciolab.wiktionaryapp.settings.SettingsView
+import org.terciolab.wiktionaryapp.settings.SettingsViewModel
 
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(settingsViewModel: SettingsViewModel = viewModel()) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
     val showBottomBar = when (currentDestination?.route) {
-        Nav.Search.route, Nav.Settings.route -> true
+        Nav.Search.route, Nav.Settings.route, Nav.Details.route -> true
         else -> false
     }
 
@@ -82,28 +79,40 @@ fun AppNavigation() {
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background),
             enterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { it },
-                    animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)
-                ) + fadeIn(animationSpec = tween(400))
+                fadeIn(animationSpec = tween(300)) + slideInHorizontally(
+                    initialOffsetX = { it / 10 },
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
+                )
             },
             exitTransition = {
-                slideOutHorizontally(
-                    targetOffsetX = { -it / 3 },
-                    animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)
-                ) + fadeOut(animationSpec = tween(400))
+                fadeOut(animationSpec = tween(300)) + slideOutHorizontally(
+                    targetOffsetX = { -it / 10 },
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
+                )
             },
             popEnterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { -it / 3 },
-                    animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)
-                ) + fadeIn(animationSpec = tween(400))
+                fadeIn(animationSpec = tween(300)) + slideInHorizontally(
+                    initialOffsetX = { -it / 10 },
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
+                )
             },
             popExitTransition = {
-                slideOutHorizontally(
-                    targetOffsetX = { it },
-                    animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)
-                ) + fadeOut(animationSpec = tween(400))
+                fadeOut(animationSpec = tween(300)) + slideOutHorizontally(
+                    targetOffsetX = { it / 10 },
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
+                )
             }
         ) {
             composable(Nav.Search.route) {
@@ -111,7 +120,7 @@ fun AppNavigation() {
                 SearchView(navController, searchViewModel)
             }
             composable(Nav.Settings.route) {
-                SettingsView()
+                SettingsView(settingsViewModel)
             }
             composable(
                 Nav.Details.route,
@@ -147,13 +156,10 @@ fun AppNavigation() {
 
 @Composable
 fun ExpressiveNavigationBar(navController: NavHostController) {
-    val items = listOf(
-        NavigationItem("Home", Nav.Search.route, Icons.Default.Home),
-        NavigationItem("Settings", Nav.Settings.route, Icons.Default.Settings)
-    )
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+
+    val isOnDefinition = currentDestination?.route == Nav.Details.route
 
     Box(
         modifier = Modifier
@@ -165,7 +171,13 @@ fun ExpressiveNavigationBar(navController: NavHostController) {
         Surface(
             modifier = Modifier
                 .wrapContentWidth()
-                .clip(RoundedCornerShape(40.dp)),
+                .clip(RoundedCornerShape(40.dp))
+                .animateContentSize(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    )
+                ),
             color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.95f)
         ) {
             Row(
@@ -173,23 +185,72 @@ fun ExpressiveNavigationBar(navController: NavHostController) {
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                items.forEach { item ->
-                    val isSelected = currentDestination?.hierarchy?.any { it.route == item.route } == true
-                    ExpressiveNavItem(
-                        item = item,
-                        isSelected = isSelected,
-                        onClick = {
-                            if (!isSelected) {
-                                navController.navigate(item.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            }
+                // Home Item
+                val isHomeSelected = currentDestination?.hierarchy?.any { it.route == Nav.Search.route } == true
+                ExpressiveNavItem(
+                    item = NavigationItem("Home", Nav.Search.route, Icons.Default.Home),
+                    isSelected = isHomeSelected,
+                    onClick = {
+                        if (!isHomeSelected) {
+                            navController.popBackStack(Nav.Search.route, inclusive = false)
                         }
-                    )
+                    }
+                )
+
+                // The "Melting" Content (Definition + Settings)
+                AnimatedContent(
+                    targetState = isOnDefinition,
+                    transitionSpec = {
+                        (fadeIn(animationSpec = tween(500)) + scaleIn(initialScale = 0.92f))
+                            .togetherWith(fadeOut(animationSpec = tween(400)) + scaleOut(targetScale = 0.92f))
+                            .using(SizeTransform(clip = false))
+                    },
+                    label = "pill_melt"
+                ) { onDefinition ->
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (onDefinition) {
+                            // Show both when on definition
+                            ExpressiveNavItem(
+                                item = NavigationItem("Definition", Nav.Details.route, Icons.AutoMirrored.Filled.MenuBook),
+                                isSelected = true,
+                                onClick = { /* Already here */ }
+                            )
+                            ExpressiveNavItem(
+                                item = NavigationItem("Settings", Nav.Settings.route, Icons.Default.Settings),
+                                isSelected = false,
+                                onClick = {
+                                    navController.navigate(Nav.Settings.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            )
+                        } else {
+                            // Just show settings otherwise
+                            val isSettingsSelected = currentDestination?.hierarchy?.any { it.route == Nav.Settings.route } == true
+                            ExpressiveNavItem(
+                                item = NavigationItem("Settings", Nav.Settings.route, Icons.Default.Settings),
+                                isSelected = isSettingsSelected,
+                                onClick = {
+                                    if (!isSettingsSelected) {
+                                        navController.navigate(Nav.Settings.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Nightlight
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -33,13 +34,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsView() {
+fun SettingsView(viewModel: SettingsViewModel = viewModel()) {
     val scrollState = rememberScrollState()
     var isAboutExpanded by remember { mutableStateOf(false) }
+    val isAmoled by viewModel.isAmoled.collectAsState()
 
     Scaffold(
         topBar = {
@@ -67,10 +70,22 @@ fun SettingsView() {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Information",
+                text = "Appearance",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(start = 8.dp, top = 8.dp)
+            )
+
+            AmoledSwitch(
+                checked = isAmoled,
+                onCheckedChange = { viewModel.setAmoled(it) }
+            )
+
+            Text(
+                text = "Information",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(start = 8.dp, top = 16.dp)
             )
 
             // The "Big ol long button" for About
@@ -90,6 +105,43 @@ fun SettingsView() {
             Spacer(modifier = Modifier.height(48.dp))
             
             Spacer(modifier = Modifier.height(100.dp))
+        }
+    }
+}
+
+@Composable
+fun AmoledSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Surface(
+        onClick = { onCheckedChange(!checked) },
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(24.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Nightlight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = "Pure black",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.ExtraBold,
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Switch(
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = MaterialTheme.colorScheme.primary,
+                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
+                )
+            )
         }
     }
 }

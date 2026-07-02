@@ -26,17 +26,23 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
+    private val _query = MutableStateFlow("")
+    val query: StateFlow<String> = _query
+
     private val _selectedLanguage = MutableStateFlow(getLanguageByCode(getCurrentLocale().language))
     val selectedLanguage: StateFlow<Language> = _selectedLanguage
 
     fun searchWord(query: String) {
+        _query.value = query
         if (query.isEmpty()) {
+            _searchResults.value = emptyList()
             return
         }
         viewModelScope.launch {
             _isLoading.value = true
             try {
                 delay(300)
+                if (_query.value != query) return@launch // Debounce check
                 val results = ApiClient.getWiki(selectedLanguage.value.code).suggestWords(query)
 
                 _searchResults.value = results.pages
@@ -47,6 +53,11 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
                 _isLoading.value = false
             }
         }
+    }
+
+    fun clearQuery() {
+        _query.value = ""
+        _searchResults.value = emptyList()
     }
 
     fun setLanguage(language: Language) {

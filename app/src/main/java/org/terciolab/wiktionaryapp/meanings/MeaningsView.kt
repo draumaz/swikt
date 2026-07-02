@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -235,22 +237,72 @@ fun WordMeaningItem(meaning: WordMeaning, onNavigateToWord: (String) -> Unit) {
 
             meaning.senses.forEachIndexed { i, sense ->
                 if (sense.glosses != null) {
-                    Column(modifier = Modifier.padding(bottom = 12.dp)) {
-                        Text(
-                            text = "${i + 1}. " + sense.glosses.joinToString(". ")
-                                .replaceFirstChar { it.titlecase(Locale.getDefault()) },
-                            style = MaterialTheme.typography.bodyLarge,
-                            textAlign = TextAlign.Left
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.5f),
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp, 
+                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
                         )
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(verticalAlignment = Alignment.Top) {
+                                // Index badge
+                                Surface(
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(22.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text(
+                                            text = "${i + 1}",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onPrimary,
+                                            fontWeight = FontWeight.ExtraBold
+                                        )
+                                    }
+                                }
+                                
+                                Spacer(modifier = Modifier.width(12.dp))
+                                
+                                Text(
+                                    text = sense.glosses.joinToString(". ")
+                                        .replaceFirstChar { it.titlecase(Locale.getDefault()) },
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    lineHeight = 24.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
 
-                        sense.tags?.let { tags ->
-                            Text(
-                                text = tags.joinToString(", "),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.secondary,
-                                textAlign = TextAlign.Left,
-                                modifier = Modifier.padding(top = 4.dp)
-                            )
+                            sense.tags?.let { tags ->
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    tags.forEach { tag ->
+                                        Surface(
+                                            shape = CircleShape,
+                                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f),
+                                            border = androidx.compose.foundation.BorderStroke(
+                                                1.dp,
+                                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
+                                            )
+                                        ) {
+                                            Text(
+                                                text = tag,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
