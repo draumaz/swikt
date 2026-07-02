@@ -1,91 +1,82 @@
-# swikt
+# 📖 swikt
 
-![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![Kotlin](https://img.shields.io/badge/Kotlin-0095D5?style=for-the-badge&logo=kotlin&logoColor=white) ![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=for-the-badge&logo=jetpack-compose&logoColor=white)
+[![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/about/versions/15)
+[![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=for-the-badge&logo=jetpack-compose&logoColor=white)](https://developer.android.com/compose)
+[![Vibe Coded](https://img.shields.io/badge/Vibe%20Coded-Gemini-orange?style=for-the-badge&logo=google-gemini&logoColor=white)](https://deepmind.google/technologies/gemini/android-studio/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-swikt is a fork of [Terciocode's Simple Wiktionary](https://github.com/Terciocode/WiktionaryTercioApp). 
-It is an open-source Android app that provides an easy-to-use interface for searching and retrieving definitions from the **Wiktionary API**.
-All adaptations in this fork have been **vibe coded with Gemini in Android Studio**. ✨
+**swikt** is a beautifully crafted fork of [Terciocode's Simple Wiktionary](https://github.com/Terciocode/WiktionaryTercioApp). 
+It’s an open-source Android dictionary experience designed for speed, clarity, and modern aesthetics.
 
-The app supports English and Spanish Wiktionary definitions, as well as definitions of the words in other languages. 
-Each definition page includes **IPA pronunciation**, **etymology**, and other word details.
-
----
-
-## Features
-
-- **Free and Open Source**: No ads, no payments, just a simple dictionary app.
-    
-- **Multi-language Support**: Get definitions in multiple languages using the Wiktionary API.
-    
-- **Deep Link Support**: Redirect links ending in `*.wiktionary.org` directly into the app for a seamless experience.
-
-- **Expressive M3 UI**: Built with **Jetpack Compose** and **Material Design 3**, featuring a modern, floating navigation pill and collapsible app bars.
-
-- **Predictive Back Support**: Native support for Android's predictive back gesture for smooth navigation.
-
-- **Edge-to-Edge Design**: Fully immersive experience where content flows behind system bars and navigation elements.
+All adaptations in this fork have been meticulously **vibe coded with Gemini in Android Studio**. ✨
 
 ---
 
-## Photos
+## ✨ Features
 
-| Home Screen | Search Interface | Word Definitions |
+- **🚀 Performance First**: Built for speed using the Wiktionary API and Kaikki.org.
+- **🌍 Polyglot Ready**: Full support for English and Spanish definitions, plus words from countless other languages.
+- **🎨 Material 3 Magic**: A state-of-the-art UI featuring a custom floating navigation pill and dynamic, collapsible app bars.
+- **🔗 Deep Link Integration**: Links ending in `*.wiktionary.org` open directly in the app for a frictionless workflow.
+- **🔄 Modern UX**: Full support for **Predictive Back** gestures and an **Edge-to-Edge** layout that makes your screen feel limitless.
+- **🛡️ Privacy Minded**: No ads, no tracking, no bloat. Just definitions.
+
+---
+
+## 📸 Gallery
+
+| Home Screen | Search | Definitions |
 | :---: | :---: | :---: |
 | ![Home](img/swikt-home.jpg) | ![Search](img/swikt-search.jpg) | ![List](img/swikt-list.jpg) |
-| The main landing page | Searching for a word | Detailed word definitions |
+| *Clean Landing* | *Instant Search* | *Rich Details* |
 
 ---
 
-## Installation
+## 🛠️ Tech Stack
 
-### Option 1: Install via Google Play Store (Pending Approval)
+Built with the best-in-class Android libraries:
 
-Once approved, you can download the app directly from the Google Play Store.
-
-### Option 2: Build Locally
-
-1. Clone this repository:
-    `git clone https://github.com/Terciocode/WiktionaryTercioApp.git`
-    
-2. Open the project in **Android Studio**.
-    
-3. Build and run the app on your Android device or emulator.
-    
+*   **UI**: [Jetpack Compose](https://developer.android.com/compose) with [Material Design 3](https://m3.material.io/)
+*   **Networking**: [Retrofit](https://square.github.io/retrofit/) & OkHttp (with Logging Interceptor)
+*   **Serialization**: [Moshi](https://github.com/square/moshi) (with KSP-based codegen)
+*   **Navigation**: [Compose Navigation](https://developer.android.com/jetpack/compose/navigation)
+*   **Image Loading**: [Coil](https://coil-kt.github.io/coil/)
+*   **Architecture**: MVVM with Clean Architecture principles
 
 ---
 
-## Usage
+## 🚀 Getting Started
 
-1. Open the app.
-    
-2. Enter a word in the search bar.
-    
-3. View the definition, IPA pronunciation, etymology, and other details.
-    
-4. Navigate effortlessly using the custom floating navigation pill.
-    
+### Prerequisites
+*   Android Studio Ladybug (or newer)
+*   JDK 17+
+*   Android SDK 35
 
----
-
-## Technologies Used
-
-- **Jetpack Compose**: Modern Android UI toolkit.
-    
-- **Retrofit**: For making API calls to both Wiktionary API and Kaikki.org.
-    
-- **Moshi**: For parsing JSON responses from the API.
-    
-- **Material Design 3**: For a clean and modern user interface with expressive components.
-    
+### Build Locally
+1. **Clone the repo**
+   ```bash
+   git clone https://github.com/draumaz/swikt.git
+   ```
+2. **Open in Android Studio**
+   Wait for the Gradle sync to finish.
+3. **Run it!**
+   Select your device and hit `Shift + F10`.
 
 ---
 
-## Credits
+## 🤝 Credits & Acknowledgements
 
-- **Terciocode**: For the original Simple Wiktionary app.
-- **draumaz**: For the fork and architecting the new vibes.
-- **Gemini in Android Studio**: For vibe coding the adaptations.
-- **Wiktionary API and Kaikki.org**: For providing the word definitions and details.
-- **Jetpack Compose**: For enabling a modern and declarative UI.
-- **Material Design 3**: For the beautiful and intuitive design components.
-    
+- **[Terciocode](https://github.com/Terciocode)**: For the rock-solid foundation of the original app.
+- **[draumaz](https://github.com/draumaz)**: For the architectural vision and vibe-heavy adaptations.
+- **Gemini in Android Studio**: For being the ultimate pair programmer and vibe-coding engine.
+- **Wiktionary & Kaikki.org**: For the incredible open-data APIs.
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
+<p align="center">Made with ❤️ and ✨ by draumaz</p>
