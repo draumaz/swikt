@@ -60,6 +60,7 @@ import androidx.navigation.navDeepLink
 import org.terciolab.wiktionaryapp.meanings.MeaningsView
 import org.terciolab.wiktionaryapp.search.SearchView
 import org.terciolab.wiktionaryapp.search.SearchViewModel
+import org.terciolab.wiktionaryapp.settings.SettingsView
 
 
 @Composable
@@ -125,7 +126,14 @@ fun AppNavigation() {
             ) { backStackEntry ->
                 val word = backStackEntry.arguments?.getString("word")?.replace("_", " ") ?: ""
                 val lang = backStackEntry.arguments?.getString("lang") ?: "en"
-                MeaningsView(word, lang, onBack = { navController.popBackStack() })
+                MeaningsView(
+                    word = word,
+                    lang = lang,
+                    onBack = { navController.popBackStack() },
+                    onNavigateToWord = { newWord ->
+                        navController.navigate("details/$lang/$newWord")
+                    }
+                )
             }
         }
 
@@ -251,23 +259,6 @@ fun ExpressiveNavItem(
 }
 
 data class NavigationItem(val label: String, val route: String, val icon: ImageVector)
-
-@Composable
-fun SettingsView() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                Icons.Default.Settings,
-                contentDescription = null,
-                modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("Settings", style = MaterialTheme.typography.headlineMedium)
-            Text("Nothing here yet", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}
 
 sealed class Nav(val route: String ) {
     object Search           : Nav("search")

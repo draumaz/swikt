@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.moshi.kotlin)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.logging.interceptor)
+    implementation(libs.coil.compose)
 
     ksp(libs.moshi.kotlin.codegen)
     testImplementation(libs.junit)
