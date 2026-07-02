@@ -25,6 +25,15 @@ Each definition page includes **IPA pronunciation**, **etymology**, and other 
 
 ---
 
+## Photos
+
+| Home Screen | Search Interface | Word Definitions |
+| :---: | :---: | :---: |
+| ![Home](img/swikt-home.jpg) | ![Search](img/swikt-search.jpg) | ![List](img/swikt-list.jpg) |
+| The main landing page | Searching for a word | Detailed word definitions |
+
+---
+
 ## Installation
 
 ### Option 1: Install via Google Play Store (Pending Approval)
