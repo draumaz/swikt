@@ -128,7 +128,7 @@ fun AmoledSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text(
-                text = "Pure black",
+                text = "AMOLED black background",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.ExtraBold,
                 modifier = Modifier.weight(1f),
