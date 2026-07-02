@@ -22,21 +22,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.terciolab.wiktionaryapp.api.WordMeaning
 import java.util.Locale
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun MeaningsView(
     word: String,
@@ -158,6 +157,11 @@ fun WordMeaningItem(meaning: WordMeaning, onNavigateToWord: (String) -> Unit) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
+            }
+
+            meaning.forms?.let { forms ->
+                GrammarSection(forms)
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
             meaning.etymology_text?.let { etymology ->
@@ -306,6 +310,119 @@ fun WordMeaningItem(meaning: WordMeaning, onNavigateToWord: (String) -> Unit) {
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+fun GrammarSection(forms: List<org.terciolab.wiktionaryapp.api.WordForm>) {
+    val cases = listOf("nominative", "genitive", "dative", "accusative", "instrumental", "prepositional")
+    val numbers = listOf("singular", "plural")
+
+    // Filter forms that have both a case and a number tag
+    val declensionMap = mutableMapOf<Pair<String, String>, String>()
+    forms.forEach { form ->
+        val tags = form.tags ?: emptyList()
+        val c = cases.find { tags.contains(it) }
+        val n = numbers.find { tags.contains(it) }
+        if (c != null && n != null) {
+            declensionMap[Pair(c, n)] = form.form
+        }
+    }
+
+    if (declensionMap.isNotEmpty()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            ),
+            shape = RoundedCornerShape(16.dp),
+            border = androidx.compose.foundation.BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            )
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(
+                    text = "Declension",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
+                )
+
+                // Header Row
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Box(modifier = Modifier.weight(1f)) // Empty corner
+                    numbers.forEach { number ->
+                        Text(
+                            text = number.replaceFirstChar { it.uppercase() },
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.weight(1.5f),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
+                cases.forEach { case ->
+                    if (numbers.any { n -> declensionMap.containsKey(Pair(case, n)) }) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Case Name
+                            Text(
+                                text = case.take(3).uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.secondary,
+                                fontWeight = FontWeight.ExtraBold,
+                                modifier = Modifier.weight(1f)
+                            )
+
+                            numbers.forEach { number ->
+                                val formText = declensionMap[Pair(case, number)] ?: "—"
+                                Text(
+                                    text = formText,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = if (formText == "—") MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.weight(1.5f)
+                                )
+                            }
+                        }
+                        if (case != cases.last()) {
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.1f))
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        // Fallback for other types of inflections
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            forms.take(8).forEach { form ->
+                SuggestionChip(
+                    onClick = { },
+                    label = { 
+                        Text(
+                            text = "${form.form} (${form.tags?.joinToString(", ")})",
+                            style = MaterialTheme.typography.labelSmall
+                        ) 
+                    }
+                )
             }
         }
     }

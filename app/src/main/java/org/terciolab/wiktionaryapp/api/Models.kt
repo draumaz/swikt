@@ -20,13 +20,20 @@ data class Sense(
 )
 
 @JsonClass(generateAdapter = true)
+data class WordForm(
+    val form: String,
+    val tags: List<String>?
+)
+
+@JsonClass(generateAdapter = true)
 data class WordMeaning(
     val senses: List<Sense>,
     val pos: String,
     val word: String,
     val lang: String,
     val etymology_text: String?,
-    val sounds: List<Sound>?
+    val sounds: List<Sound>?,
+    val forms: List<WordForm>?
 )
 
 @JsonClass(generateAdapter = true)
