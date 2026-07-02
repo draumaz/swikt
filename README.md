@@ -7,9 +7,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 **swikt** is a beautifully crafted fork of [Terciocode's Simple Wiktionary](https://github.com/Terciocode/WiktionaryTercioApp). 
-It’s an open-source Android dictionary experience designed for speed, clarity, and modern aesthetics.
+It’s an open-source Android dictionary experience designed for speed, clarity, and modern aesthetics—mostly because **draumaz** doesn't actually know how to write a single line of Kotlin and relies entirely on AI to do the heavy lifting.
 
-All adaptations in this fork have been meticulously **vibe coded with Gemini in Android Studio**. ✨
+All adaptations in this fork have been meticulously **vibe coded with Gemini in Android Studio**, because let's be honest, draumaz would be lost without a prompt box. ✨
 
 ---
 
