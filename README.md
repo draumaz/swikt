@@ -5,7 +5,7 @@
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=for-the-badge&logo=jetpack-compose&logoColor=white)](https://developer.android.com/compose)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-**swikt** is a fork of [Terciocode's Simple Wiktionary](https://github.com/Terciocode/WiktionaryTercioApp). 
+**swikt** is an entirely vibe-coded fork of [Terciocode's Simple Wiktionary](https://github.com/Terciocode/WiktionaryTercioApp). 
 It is an open-source Android dictionary application designed for speed, clarity, and a modern user interface.
 
 ---
@@ -13,9 +13,7 @@ It is an open-source Android dictionary application designed for speed, clarity,
 ## Features
 
 - **Performance First**: Optimized for speed using the Wiktionary API and Kaikki.org.
-- **Polyglot Support**: Support for English and Spanish definitions, and words from various other languages.
 - **Material 3 Interface**: Modern UI featuring a custom floating navigation pill and dynamic, collapsible app bars.
-- **Deep Link Integration**: Links ending in `*.wiktionary.org` open directly in the app.
 - **Modern UX**: Support for Predictive Back gestures and an Edge-to-Edge layout.
 - **Privacy Focused**: No ads, no tracking, and no unnecessary bloat.
 
