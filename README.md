@@ -1,10 +1,12 @@
-# Simple Wiktionary
+# swikt
 
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![Kotlin](https://img.shields.io/badge/Kotlin-0095D5?style=for-the-badge&logo=kotlin&logoColor=white) ![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=for-the-badge&logo=jetpack-compose&logoColor=white)
 
-Simple Wiktionary is an open-source Android app that provides an easy-to-use interface for searching and retrieving definitions from the **Wiktionary API**. 
-Unlike other Wiktionary clients, this app is completely free, ad-free, and open-source. 
-It supports English and Spanish Wiktionary definitions, as well as definitions of the words in other languages. 
+swikt is a fork of [Terciocode's Simple Wiktionary](https://github.com/Terciocode/WiktionaryTercioApp). 
+It is an open-source Android app that provides an easy-to-use interface for searching and retrieving definitions from the **Wiktionary API**.
+All adaptations in this fork have been **vibe coded with Gemini in Android Studio**. ✨
+
+The app supports English and Spanish Wiktionary definitions, as well as definitions of the words in other languages. 
 Each definition page includes **IPA pronunciation**, **etymology**, and other word details.
 
 ---
@@ -80,9 +82,10 @@ Once approved, you can download the app directly from the Google Play Store.
 
 ## Credits
 
-- **Wiktionary API and  Kaikki.org**: For providing the word definitions and details.
-    
+- **Terciocode**: For the original Simple Wiktionary app.
+- **draumaz**: For the fork and architecting the new vibes.
+- **Gemini in Android Studio**: For vibe coding the adaptations.
+- **Wiktionary API and Kaikki.org**: For providing the word definitions and details.
 - **Jetpack Compose**: For enabling a modern and declarative UI.
-    
 - **Material Design 3**: For the beautiful and intuitive design components.
     

@@ -113,7 +113,7 @@ fun AboutButton(isExpanded: Boolean, onClick: () -> Unit) {
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text(
-                text = "About Simple Wiktionary",
+                text = "About swikt",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.ExtraBold,
                 modifier = Modifier.weight(1f),

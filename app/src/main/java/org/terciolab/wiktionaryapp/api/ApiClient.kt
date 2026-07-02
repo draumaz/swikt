@@ -27,7 +27,7 @@ object ApiClient {
     // User-Agent interceptor following Wikimedia guidelines
     private val userAgentInterceptor = Interceptor { chain ->
         val request = chain.request().newBuilder()
-            .header("User-Agent", "WiktionaryApp/1.0 (https://github.com/Terciocode/WiktionaryTercioApp; sebirocsdev@gmail.com)")
+            .header("User-Agent", "swikt/1.0 (https://github.com/Terciocode/WiktionaryTercioApp; sebirocsdev@gmail.com)")
             .build()
         chain.proceed(request)
     }
