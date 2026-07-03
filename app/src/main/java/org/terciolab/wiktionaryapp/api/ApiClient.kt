@@ -54,19 +54,17 @@ object ApiClient {
             .build()
     }
 
-    private var wiki : WikiService? = null
+    private val wikiServices = mutableMapOf<String, WikiService>()
 
     fun getWiki(lang: String): WikiService {
-        if (wiki == null) {
-
-            wiki = Retrofit.Builder()
+        return wikiServices.getOrPut(lang) {
+            Retrofit.Builder()
                 .client(client)
-                .baseUrl(String.format(WIKTIONARY_SEARCH_URL,lang))
+                .baseUrl(String.format(WIKTIONARY_SEARCH_URL, lang))
                 .addConverterFactory(MoshiConverterFactory.create())
                 .build()
                 .create(WikiService::class.java)
         }
-        return wiki!!
     }
 
     val kaikki : KaikkiService by lazy {

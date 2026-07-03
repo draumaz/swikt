@@ -6,7 +6,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -47,10 +46,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 fun SettingsView(
     viewModel: SettingsViewModel = viewModel(),
     predictiveBackState: org.terciolab.wiktionaryapp.PredictiveBackState? = null,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
 ) {
     val scrollState = rememberScrollState()
-    var isAboutExpanded by remember { mutableStateOf(false) }
+    var isAboutExpanded by remember { mutableStateOf(value = false) }
     val isAmoled by viewModel.isAmoled.collectAsState()
 
     predictiveBackState?.let { pbState ->
@@ -63,7 +62,7 @@ fun SettingsView(
                 pbState.isSwipeActive = false
                 pbState.progress = 0f
                 onBack()
-            } catch (e: Exception) {
+            } catch (ignored: Exception) {
                 pbState.isSwipeActive = false
                 pbState.progress = 0f
             }
@@ -116,8 +115,7 @@ fun SettingsView(
 
             AmoledSwitch(
                 checked = isAmoled,
-                onCheckedChange = { viewModel.setAmoled(it) }
-            )
+            ) { viewModel.setAmoled(it) }
 
             Text(
                 text = "Information",
@@ -324,10 +322,10 @@ fun ContributorItem(
         modifier = Modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = {
+            .clickable {
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
-            })
+            }
             .padding(vertical = 12.dp, horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -337,20 +335,23 @@ fun ContributorItem(
             modifier = Modifier.size(40.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
-                if (imageUrl != null) {
-                    AsyncImage(
-                        model = imageUrl,
-                        contentDescription = name,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else if (icon != null) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                when {
+                    imageUrl != null -> {
+                        AsyncImage(
+                            model = imageUrl,
+                            contentDescription = name,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    icon != null -> {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
         }

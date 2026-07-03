@@ -3,7 +3,6 @@ package org.terciolab.wiktionaryapp.search
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -49,7 +48,7 @@ fun SearchView(navController: NavController, viewModel: SearchViewModel = viewMo
                 title = {
                     Text(
                         text = stringResource(R.string.app_name),
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                 },
                 scrollBehavior = scrollBehavior
@@ -88,25 +87,26 @@ fun SearchView(navController: NavController, viewModel: SearchViewModel = viewMo
                             }
                             navController.navigate("details/${selectedLang.code}/$targetWord")
                         }
-                    }
+                    },
                 ),
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 trailingIcon = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (query.isNotEmpty()) {
-                            IconButton(onClick = {
-                                viewModel.clearQuery()
-                            }) {
+                            IconButton(
+                                onClick = {
+                                    viewModel.clearQuery()
+                                },
+                            ) {
                                 Icon(Icons.Default.Close, contentDescription = "Clear")
                             }
                         }
                         LanguageSelectionButton(
                             selectedLanguage = selectedLang,
-                            onLanguageSelected = { lang ->
-                                viewModel.setLanguage(lang)
-                                viewModel.clearQuery()
-                            }
-                        )
+                        ) { lang ->
+                            viewModel.setLanguage(lang)
+                            viewModel.clearQuery()
+                        }
                         Spacer(modifier = Modifier.width(8.dp))
                     }
                 },
@@ -232,7 +232,7 @@ fun LanguageSelectionButton(
     selectedLanguage: Language,
     onLanguageSelected: (Language) -> Unit
 ) {
-    var showLanguageMenu by remember { mutableStateOf(false) }
+    var showLanguageMenu by remember { mutableStateOf(value = false) }
 
     Surface(
         onClick = { showLanguageMenu = true },

@@ -1,6 +1,5 @@
 package org.terciolab.wiktionaryapp
 
-import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -55,17 +54,19 @@ import org.terciolab.wiktionaryapp.settings.SettingsView
 import org.terciolab.wiktionaryapp.settings.SettingsViewModel
 import kotlin.math.*
 
+import kotlin.time.Duration.Companion.milliseconds
+
 @Stable
 class PredictiveBackState {
     var progress by mutableFloatStateOf(0f)
-    var isSwipeActive by mutableStateOf(false)
+    var isSwipeActive by mutableStateOf(value = false)
 }
 
 class ScallopedPillShape(private val isScalloped: Boolean) : Shape {
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
-        density: Density
+        density: Density,
     ): Outline {
         val path = Path()
         val width = size.width
@@ -87,7 +88,7 @@ class ScallopedPillShape(private val isScalloped: Boolean) : Shape {
         val numPoints = 120
 
         fun getPoint(p: Float): Pair<Offset, Offset> {
-            val straight = (width - 2 * radius).coerceAtLeast(0f)
+            val straight = (width - (2 * radius)).coerceAtLeast(0f)
             val arc = PI.toFloat() * radius
             val total = 2 * straight + 2 * arc
             val d = p * total
@@ -209,7 +210,7 @@ fun AppNavigation(settingsViewModel: SettingsViewModel = viewModel()) {
                 SettingsView(
                     viewModel = settingsViewModel,
                     predictiveBackState = predictiveBackState,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
                 )
             }
             composable(
@@ -412,7 +413,7 @@ fun ExpressiveNavItem(
     LaunchedEffect(isPressed) {
         if (isPressed) {
             val job = launch {
-                delay(2000)
+                delay(2000.milliseconds)
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 onLongHold()
             }

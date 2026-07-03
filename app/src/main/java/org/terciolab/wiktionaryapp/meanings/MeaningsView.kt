@@ -15,7 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -46,7 +45,7 @@ fun MeaningsView(
     predictiveBackState: org.terciolab.wiktionaryapp.PredictiveBackState,
     onBack: () -> Unit,
     onNavigateToWord: (String) -> Unit,
-    viewModel: MeaningsViewModel = viewModel()
+    viewModel: MeaningsViewModel = viewModel(),
 ) {
     val wordMeanings by viewModel.wordMeanings.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -60,7 +59,7 @@ fun MeaningsView(
             predictiveBackState.isSwipeActive = false
             predictiveBackState.progress = 0f
             onBack()
-        } catch (e: Exception) {
+        } catch (ignored: Exception) {
             predictiveBackState.isSwipeActive = false
             predictiveBackState.progress = 0f
         }
@@ -140,7 +139,7 @@ fun MeaningsView(
 
 @Composable
 fun WordMeaningItem(meaning: WordMeaning, onNavigateToWord: (String) -> Unit) {
-    var isExpanded by remember { mutableStateOf(true) }
+    var isExpanded by remember { mutableStateOf(value = true) }
     val haptic = LocalHapticFeedback.current
 
     ElevatedCard(
@@ -176,7 +175,7 @@ fun WordMeaningItem(meaning: WordMeaning, onNavigateToWord: (String) -> Unit) {
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = meaning.pos.replaceFirstChar { it.uppercase() },
+                        text = meaning.pos.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
@@ -340,7 +339,7 @@ fun WordMeaningItem(meaning: WordMeaning, onNavigateToWord: (String) -> Unit) {
                                         ) {
                                             Box(contentAlignment = Alignment.Center) {
                                                 Text(
-                                                    text = "${i + 1}",
+                                                    text = (i + 1).toString(),
                                                     style = MaterialTheme.typography.labelSmall,
                                                     color = MaterialTheme.colorScheme.onPrimary,
                                                     fontWeight = FontWeight.ExtraBold
@@ -407,7 +406,7 @@ fun GrammarSection(forms: List<org.terciolab.wiktionaryapp.api.WordForm>) {
         val tags = form.tags ?: emptyList()
         val c = cases.find { tags.contains(it) }
         val n = numbers.find { tags.contains(it) }
-        if (c != null && n != null) {
+        if ((c != null) && (n != null)) {
             declensionMap[Pair(c, n)] = form.form
         }
     }
@@ -517,7 +516,7 @@ fun parseEtymology(text: String, linkColor: Color): AnnotatedString {
         .replace("&amp;", "&")
 
     return buildAnnotatedString {
-        val wikiRegex = Regex("""\[\[([^|\]#]+)(?:#[^|\]]+)?(?:\|([^\]]+))?]]""")
+        val wikiRegex = Regex("""\[\[([^|\]#]+)(?:#[^|\]]+)?(?:\|([^]]+))?]]""")
         val htmlRegex = Regex("""<a\s+href="[^"]*/wiki/([^"]+)"[^>]*>([^<]*)</a>""")
         
         val markersList = listOf(

@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
             WiktionaryAppTheme(amoled = amoled) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     AppNavigation(settingsViewModel)
                 }

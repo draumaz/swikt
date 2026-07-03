@@ -14,6 +14,7 @@ import org.terciolab.wiktionaryapp.api.ApiClient
 import org.terciolab.wiktionaryapp.api.SearchWord
 import org.terciolab.wiktionaryapp.getLanguageByCode
 import java.util.Locale
+import kotlin.time.Duration.Companion.milliseconds
 
 
 class SearchViewModel(application: Application) : AndroidViewModel(application) {
@@ -23,7 +24,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     private val _searchResults = MutableStateFlow<List<SearchWord>>(emptyList())
     val searchResults: StateFlow<List<SearchWord>> = _searchResults
 
-    private val _isLoading = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(value = false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _query = MutableStateFlow("")
@@ -41,7 +42,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                delay(300)
+                delay(300.milliseconds)
                 if (_query.value != query) return@launch // Debounce check
                 val results = ApiClient.getWiki(selectedLanguage.value.code).suggestWords(query)
 
@@ -62,10 +63,6 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
 
     fun setLanguage(language: Language) {
         _selectedLanguage.update { language }
-    }
-
-    fun clearList() {
-        _searchResults.value = emptyList()
     }
 
     fun getCurrentLocale(): Locale {

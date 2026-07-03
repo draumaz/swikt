@@ -16,18 +16,28 @@ class MeaningsViewModel : ViewModel() {
     private val _wordMeanings = MutableStateFlow<List<WordMeaning>>(emptyList())
     val wordMeanings: StateFlow<List<WordMeaning>> = _wordMeanings
 
-    private val _isLoading = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(value = false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
     fun fetchWordMeanings(word: String, langCode: String) {
-        val langPrefix = getLanguageByCode(langCode).prefix
+        val langPrefix = getLanguageByCode(
+            langCode,
+        ).prefix
+
+        if (word.isEmpty()) {
+            _wordMeanings.value = emptyList()
+            return
+        }
 
         viewModelScope.launch {
             _isLoading.value = true
             try {
+                val firstOne = word.take(1)
+                val firstTwo = if (word.length >= 2) word.take(2) else word.take(1) + "_"
+                
                 val meanings = ApiClient.kaikki.getWordMeanings(
-                    word.substring(0, 1),
-                    word.substring(0, 2),
+                    firstOne,
+                    firstTwo,
                     word,
                     langPrefix
                 )
